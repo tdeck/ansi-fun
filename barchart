@@ -1,0 +1,48 @@
+#! /usr/bin/env perl
+# Takes a collection of lines in the form <name>\s+<number>
+# and makes a horizontal bar chart of the values that uses the full
+# terminal width.
+
+use warnings;
+use strict;
+
+my @COLORS = 1..6;
+my $COLS = int(`tput cols`);
+
+my @entries = ();
+while (<>) {
+    if (/^\s*(\S+)\s+(\S+)\s*/) {
+        push @entries, [$1, $2];
+    }
+}
+
+my $max_value = (sort { $a <=> $b } (map { $_->[1] } @entries))[-1];
+my $max_lvalue = (sort { $a <=> $b } (map { length($_->[1]) } @entries))[-1];
+
+my $maxbar = $COLS - $max_lvalue - 1;
+
+my $scale = $maxbar / $max_value;
+
+my $i = 0;
+for my $entry (@entries) {
+    my $name = $entry->[0];
+    my $value = $entry->[1];
+    my $lname = length($name);
+    my $lvalue = length($value);
+
+    my $width = int($value * $scale);
+    my $color = $COLORS[$i % @COLORS];
+
+    print 
+        `tput setab $color` .
+        substr($name, 0, $width) .
+        ' ' x ($width - $lname) .
+        `tput sgr0` .
+        ($lname > $width ? substr($name, $width) : '') .
+        `tput setaf $color` .
+        '.' x ($COLS - ($width, $lname)[$width < $lname] - $lvalue - 1) .
+        `tput sgr0` .
+        " $value\n";
+
+    ++ $i;
+}
