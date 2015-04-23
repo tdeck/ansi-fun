@@ -2,16 +2,23 @@
 # Takes a collection of lines in the form <name>\s+<number>
 # and makes a horizontal bar chart of the values that uses the full
 # terminal width.
+# You can specify a delimiter other than \s+ using the -d flag.
 
 use warnings;
 use strict;
+use Getopt::Std;
+
+my %opts = ();
+getopts('d:', \%opts);
+
+my $delimiter = $opts{'d'} || '\s+';
 
 my @COLORS = 1..6;
 my $COLS = int(`tput cols`);
 
 my @entries = ();
 while (<>) {
-    if (/^\s*(\S+)\s+(\S+)\s*/) {
+    if (/^\s*(.+?)$delimiter(.+)\s*/) {
         push @entries, [$1, $2];
     }
 }
