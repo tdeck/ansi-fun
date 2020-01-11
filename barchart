@@ -40,16 +40,20 @@ for my $entry (@entries) {
     my $width = int($value * $scale);
     my $color = $COLORS[$i % @COLORS];
 
-    print 
+    print
         `tput setab $color` .
         substr($name, 0, $width) .
-        ' ' x ($width - $lname) .
+        ' ' x min0($width - $lname) .
         `tput sgr0` .
         ($lname > $width ? substr($name, $width) : '') .
         `tput setaf $color` .
-        '.' x ($COLS - ($width, $lname)[$width < $lname] - $lvalue - 1) .
+        '.' x min0($COLS - ($width, $lname)[$width < $lname] - $lvalue - 1) .
         `tput sgr0` .
         " $value\n";
 
     ++ $i;
+}
+
+sub min0 {
+    return ($_[0] > 0) ? $_[0] : 0;
 }
